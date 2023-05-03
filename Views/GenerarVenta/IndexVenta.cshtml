@@ -1,0 +1,259 @@
+﻿@model Practica5_ProyectoVenta.Models.ViewModel.VentaVM
+@{
+    ViewData["Title"] = "IndexVenta";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<form asp-action="GenerarCompra" asp-controller="GenerarVenta" method="post">
+
+    <div class="card">
+
+        <div class="card-header bg-danger text-white">
+            Ventas
+        </div>
+
+        <div class="card-body">
+
+            <div class="row">
+            
+                <div class="col-sm-4">
+                    
+                    <label class="form-label">Codigo Venta</label>
+                    <input class="form-control form-control-sm" asp-for="CodigoVenta" type="text" />
+
+                </div>
+            
+                <div class="col-sm-4">
+                
+                    <label class="form-label">Cliente</label>
+                    <input class="form-control form-control-sm" asp-for="Idcliente" type="text" />
+                
+                </div>
+                
+            </div>
+
+            <hr />
+
+            <div class="row align-items-end">
+
+                <div class="col-sm-3">
+                    
+                    <label class="form-label">Buscar Producto</label>
+
+                    <div class="input-group">
+                        <!-- declaracion del campo para realizar las busquedas -->
+                        <span id="spansBuscar" class="input-group-text"><i class="bi bi-search"></i>B</span>                        
+                        <input id="buscarProducto" type="text" placeholder="buscar..." class="form-control">
+                    </div>
+                        
+                </div>
+
+                <div class="col-sm-3">
+
+                    <a class="btn btn-warning" onclick="enviarValor()">Buscar</a>
+
+                    <a class="btn btn-info" onclick="limpiarCampos()">Limpiar</a>
+
+                </div>
+
+            </div>
+
+            <div id="apartadoProductos" class="row align-items-end">
+                <!-- adicion desde javascript (Jquery) -->
+            </div>
+
+            <hr />
+
+            <div class="row align-items-end">
+            
+                <div class="col-sm-3">
+                    
+                    <label class="form-label">Producto</label>
+                    <input class="form-control form-control-sm" type="text" id="txtProducto" />
+                        
+                </div>      
+
+                <div class="col-sm-3">
+            
+                    <label class="form-label">Precio</label>
+                    <input class="form-control form-control-sm" type="text" id="txtPrecio" />
+
+                </div>
+
+                <div class="col-sm-3">
+            
+                    <label class="form-label">Cantidad</label>
+                    <input class="form-control form-control-sm" type="text" id="txtCantidad" />
+
+                </div>
+
+                <div class="col-sm-3">
+            
+                    <button class="btn btn-success btn-sm" id="btnAgregarDetalle" onclick="return false;">Agregar</button>
+                    <button class="btn btn-dark btn-sm" type="submit">Terminar</button>
+                    <a class="btn btn-danger btn-sm" onclick="EliminarTodo()" >Eliminar Todo</a>
+
+                </div>
+
+            </div>
+
+            <br />
+
+            <div class="row">
+
+                <div class="col-sm-12">
+            
+                    <table class="table table-bordered table-sm" id="tablaDetalles">
+                        <thead>
+                            <tr class="table-dark">
+                                <th>Producto</th>
+                                <th>Precio</th>
+                                <th>Cantidad</th>
+                                <th>Subtotal</th>
+                                <th>Opciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="cuerpoTabla">
+                                <!-- desde javascript -->
+                        </tbody>
+                    </table>
+
+                    <div id="divDetalles" class="col-sm-12">
+                        <!-- desde javascript -->
+                    </div>
+
+                </div>
+
+                <div class="col-sm-4">
+            
+                    <label class="form-label">Total</label>
+                    <input class="form-control form-control-sm" asp-for="Total" type="text" id="txtTotal" />
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</form>
+
+@section Scripts
+{
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <script>
+
+        let enviarValor = () => {
+
+            $.ajax({
+                url: "@Url.Action("buscarProducto", "GenerarVenta")",
+                type: "GET",
+                data: { busqueda: $("#buscarProducto").val() },
+                success: (response) => 
+                {
+                    $.map(response.datos, (val, index) => {
+
+                        $.each(val, (clave, valor) => {
+
+                            console.log(`id: ${valor.idproducto}`);
+                            console.log(`nombre: ${valor.producto1}`);
+                            console.log(`marca: ${valor.marca}`);
+                            console.log(`precio: ${(valor.precio).toFixed(2)}`);
+                            console.log(`cantidad: ${valor.cantidad}`);
+
+                            $('#apartadoProductos').empty();
+
+                            let $cajon = $('<div style="margin-top: 20px;" class="col-sm-4"></div>');
+                            $cajon.appendTo('#apartadoProductos');
+
+                            //-------------------------------------------------------------------------
+
+                            let $tarjeta = $('<div class="card" style="max-height: 21vh;"></div>')
+                            $tarjeta.appendTo($cajon)
+
+                            let $tarjetaHeader = $('<div class="card-header">Productos</div>')
+                            $tarjetaHeader.appendTo($tarjeta)
+
+                            let $tarjetaBody = $('<div class="card-body"></div>')
+                            $tarjetaBody.appendTo($tarjeta)
+
+                            let $row = $('<div class="row"></div>')
+                            $row.appendTo($tarjetaBody)
+
+                            //-------------------------------------------------------------------------
+                           
+                            let $col1 = $('<div class="col" style="display:flex"></div>')
+                            $col1.appendTo($row)
+
+                            let $enunciadoProducto = $('<p style="margin-right: 10px"><strong>Producto:</strong></p>')
+                            $enunciadoProducto.appendTo($col1)
+
+                            let $Producto = $(`<p>${valor.producto1}</p>`)
+                            $Producto.appendTo($col1)
+
+                            let $inputId = $(`<input id="idProducto" type="hidden" value="${valor.idproducto}">`)
+                            $inputId.appendTo($col1)
+
+                            let $inputProducto = $(`<input id="nombreProducto" type="hidden" value="${valor.producto1}">`)
+                            $inputProducto.appendTo($col1)
+
+                            //-------------------------------------------------------------------------
+
+                            let $col2 = $('<div class="col" style="display:flex"></div>')
+                            $col2.appendTo($row)
+
+                            let $enunciadoPrecio = $('<p style="margin-right: 10px"><strong>Precio:</strong></p>')
+                            $enunciadoPrecio.appendTo($col2)
+
+                            let $ProductoPrecio = $(`<p>${valor.precio}</p>`)
+                            $ProductoPrecio.appendTo($col2)
+
+                            let $inputPrecio = $(`<input id="precioProducto" type="hidden" value="${valor.precio}">`)
+                            $inputPrecio.appendTo($col2)
+
+                            //-------------------------------------------------------------------------
+
+                            let $col3 = $('<div class="col" style="display:flex"></div>')
+                            $col3.appendTo($row)
+
+                            let $enunciadoCantidad = $('<p style="margin-right: 10px"><strong>Cantidad:</strong></p>')
+                            $enunciadoCantidad.appendTo($col3)
+
+                            let $ProductoCantidad = $(`<p>${valor.cantidad}</p>`)
+                            $ProductoCantidad.appendTo($col3)
+
+                            //-------------------------------------------------------------------------
+
+                            let $col4 = $('<div class="col"></div>')
+                            $col4.appendTo($row)
+
+                            let $botonAgregar = $('<button onclick="enviarProducto(); return false;" class="btn btn-danger" >Agregar</button>')
+                            $botonAgregar.appendTo($col4)
+
+                        });
+
+                    });
+                },
+                error: () => 
+                {
+                    console.error("Error al procesar la solicitud.");
+                }
+            });
+        }
+
+        let limpiarCampos = () => {
+            $('#apartadoProductos').empty();
+            $("#buscarProducto").val("")
+            $("#buscarProducto").focus()
+        }
+
+    </script>
+
+    <script src="~/js/apiVenta/venta.js" asp-append-version="true"></script>
+
+}
+
+
+
