@@ -1,0 +1,54 @@
+create database ProyectoVenta
+
+use ProyectoVenta
+
+create table cliente
+(
+	idcliente int not null identity(1,1) primary key,
+	nombre varchar(max) not null,
+	correo varchar(max) not null
+)
+
+create table producto
+(
+	idproducto int not null identity(1,1) primary key,
+	producto varchar(max) not null,
+	marca varchar(max) not null,
+	precio numeric(10,2) not null,
+	cantidad int not null,
+)
+
+create table venta
+(
+	idventa int not null identity(1,1) primary key,
+	codigoVenta varchar(max) not null,
+	idcliente int not null references cliente(idcliente),
+	total numeric(10,2) not null,
+	fecha datetime not null
+)
+
+create table detalle_venta
+(
+	iddetalleVenta int not null identity(1,1) primary key,
+	idventa int not null references venta(idventa),
+	idproducto int not null references producto(idproducto),
+	precio numeric(10,2) not null,
+	cantidad int not null,
+	subtotal numeric(10,2)
+)
+
+insert into cliente
+values ('josue', 'jeremias333@gmail.com'),
+	   ('mario', 'mariodragondc@gmail.com')
+
+insert into producto
+values ('galletas', 'gamesa', 2.50, 100),
+	('gaseosa', 'pepsi', 2.50, 100),
+	('churros', 'diana', 4.50, 100),
+	('pan blanco', 'lido', 1.50, 100)
+
+
+select * from cliente
+select * from producto
+select * from venta
+select * from detalle_venta  
